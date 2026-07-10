@@ -73,6 +73,10 @@ export function GameProvider({ children }) {
       dispatch({ type: 'SET_COUNTDOWN', payload: data.count });
     });
 
+    socket.on('generating-mystery', () => {
+      dispatch({ type: 'SET_SCREEN', payload: 'generating' });
+    });
+
     socket.on('game-started', (data) => {
       dispatch({ type: 'SET_ROOM', payload: data.room });
       dispatch({ type: 'SET_SCREEN', payload: 'game' });
@@ -91,6 +95,7 @@ export function GameProvider({ children }) {
       socket.off('disconnect');
       socket.off('room-update');
       socket.off('countdown');
+      socket.off('generating-mystery');
       socket.off('game-started');
       socket.off('kicked');
       socket.off('room-closed');

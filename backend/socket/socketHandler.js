@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import Room from '../models/Room.js';
 import GameHistory from '../models/GameHistory.js';
 import { generateUniqueRoomCode, sanitizeString, validateRoomSettings } from '../utils/roomUtils.js';
+import { generateMysteryData } from '../utils/aiService.js';
 
 // Track socket -> player mapping for reconnection
 const socketPlayerMap = new Map();
@@ -385,6 +386,26 @@ export default function setupSocketHandlers(io) {
         io.to(roomCode).emit('room-update', formatRoomData(room));
         callback?.({ success: true });
 
+        // Kick off AI generation immediately
+        let aiResolved = false;
+        const aiPromise = generateMysteryData(room.players)
+          .then(mystery => {
+            aiResolved = true;
+            if (mystery && mystery.suspects) {
+              mystery.suspects.forEach((suspect, index) => {
+                if (room.players[index]) {
+                  suspect.playerId = room.players[index].playerId;
+                }
+              });
+            }
+            return mystery;
+          })
+          .catch(err => {
+            aiResolved = true;
+            console.error('[Socket] AI Generation error:', err);
+            return null;
+          });
+
         // Countdown
         let count = 10;
         const countdownInterval = setInterval(async () => {
@@ -393,6 +414,15 @@ export default function setupSocketHandlers(io) {
 
           if (count < 0) {
             clearInterval(countdownInterval);
+            
+            // If AI is still thinking, tell the clients to show the loading screen
+            if (!aiResolved) {
+              io.to(roomCode).emit('generating-mystery', { message: 'The AI is weaving the mystery...' });
+            }
+
+            // Wait for it to finish (if it already finished, this resolves instantly)
+            room.mysteryData = await aiPromise;
+
             room.status = 'in-progress';
             room.gameStartedAt = new Date();
             await room.save();
@@ -631,6 +661,7 @@ function formatRoomData(room) {
       type: m.type,
       timestamp: m.timestamp
     })),
+    mysteryData: room.mysteryData,
     createdAt: room.createdAt
   };
 }

@@ -6,6 +6,7 @@ class Room {
     Object.assign(this, data);
     this.players = this.players || [];
     this.messages = this.messages || [];
+    this.mysteryData = this.mysteryData || null;
     this.createdAt = this.createdAt || new Date();
     this.updatedAt = this.updatedAt || new Date();
   }

@@ -6,6 +6,7 @@ import AudioControls from './components/AudioControls.jsx';
 import IntroScreen from './components/IntroScreen.jsx';
 import MainMenu from './components/menu/MainMenu.jsx';
 import Lobby from './components/lobby/Lobby.jsx';
+import GameScreen from './components/game/GameScreen.jsx';
 import { motion, AnimatePresence } from 'framer-motion';
 import { playClickSound, playHoverSound } from './audio/audioEngine.js';
 
@@ -54,41 +55,25 @@ function AppContent() {
           </motion.div>
         )}
 
-        {state.screen === 'game' && (
+        {state.screen === 'generating' && (
           <motion.div
-            key="game"
+            key="generating"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="absolute inset-0 flex flex-col items-center justify-center bg-black z-50 p-6"
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 flex flex-col items-center justify-center bg-black z-50 text-white font-mono text-center px-4"
           >
-            <h1 
-              className="text-3xl md:text-5xl text-center px-4 tracking-wider mb-2 text-stone-100" 
-              style={{ fontFamily: 'var(--font-family-heading), Cinzel, serif' }}
-            >
-              You have entered the mansion.
+            <div className="w-16 h-16 border-t-2 border-red-500 rounded-full animate-spin mb-8 mx-auto opacity-70" />
+            <h1 className="text-xl md:text-2xl tracking-widest text-red-400">
+              The AI is weaving the story...
             </h1>
-            <p 
-              className="text-stone-500 text-base" 
-              style={{ fontFamily: 'var(--font-family-body), Cormorant Garamond, serif' }}
-            >
-              (demo ends here)
+            <p className="mt-4 text-gray-500 text-sm">
+              Gathering clues, assigning roles, awakening the spirits.
             </p>
-            <button
-              onClick={() => {
-                playClickSound();
-                actions.closeRoom();
-                window.location.href = '/';
-              }}
-              onMouseEnter={playHoverSound}
-              className="horror-btn text-lg px-12 py-5 mt-10"
-              style={{
-                borderColor: 'rgba(184, 134, 11, 0.4)'
-              }}
-            >
-              Return to Menu
-            </button>
           </motion.div>
         )}
+
+        {state.screen === 'game' && <GameScreen key="game" />}
       </AnimatePresence>
 
       {/* Global Kicked Overlay */}
