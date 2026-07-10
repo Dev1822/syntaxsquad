@@ -57,16 +57,16 @@ export default function GameScreen() {
       className="absolute inset-0 bg-black/60 backdrop-blur-sm z-50 overflow-hidden flex flex-col"
     >
       {/* Header */}
-      <header className="p-6 md:p-8 border-b border-[color:var(--color-blood-dark)] flex justify-between items-start md:items-center gap-6 bg-black/80">
+      <header className="px-6 py-8 md:px-10 md:py-10 border-b border-[color:var(--color-blood-dark)] flex flex-col md:flex-row justify-between items-start md:items-center gap-8 bg-black/80">
         <div className="flex-1 min-w-0 pr-4">
-          <h1 className="game-title text-xl md:text-3xl truncate">
+          <h1 className="game-title text-3xl md:text-5xl tracking-widest break-words leading-tight">
             {mystery.victim.name} is dead.
           </h1>
-          <p className="game-subtitle text-xs md:text-sm mt-2 break-words whitespace-pre-wrap">
+          <p className="game-subtitle text-base md:text-xl mt-4 leading-loose break-words whitespace-pre-wrap text-[color:var(--color-bone)]">
             {mystery.victim.backstory}
           </p>
         </div>
-        <div className="flex flex-col md:flex-row items-end md:items-center gap-3 shrink-0">
+        <div className="flex flex-wrap items-center gap-4 shrink-0">
           <button
             onClick={toggleMusic}
             className={`text-xs px-3 py-1 border rounded transition-colors font-[family-name:var(--font-family-heading)] tracking-widest ${
@@ -98,7 +98,7 @@ export default function GameScreen() {
       </header>
 
       {/* Tabs */}
-      <div className="flex border-b border-[color:var(--color-blood-dark)] bg-black/60">
+      <div className="flex border-t border-b border-[color:var(--color-blood-dark)] bg-black/60 my-8 md:my-12 flex-shrink-0">
         {tabs.map(tab => (
           <button
             key={tab.id}
@@ -123,7 +123,7 @@ export default function GameScreen() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="w-full max-w-3xl mx-auto space-y-8"
+              className="w-full space-y-8"
             >
               <div className="text-center mb-14 mt-4">
                 <h2 className="font-[family-name:var(--font-family-heading)] text-[color:var(--color-gold-dim)] tracking-widest uppercase mb-4 text-base">You are</h2>
@@ -161,7 +161,7 @@ export default function GameScreen() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="w-full max-w-3xl mx-auto"
+              className="w-full"
             >
               <h2 className="game-title text-3xl md:text-5xl mb-10 break-words text-center mt-4">{mystery.location.name}</h2>
               <p className="text-xl md:text-2xl leading-loose text-[color:var(--color-bone)] border-l-4 border-[color:var(--color-blood)] pl-6 md:pl-10 py-4 break-words whitespace-pre-wrap">
@@ -176,10 +176,10 @@ export default function GameScreen() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="w-full max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6"
+              className="w-full flex flex-wrap justify-center gap-8"
             >
               {otherSuspects.map((suspect, idx) => (
-                <div key={idx} className="panel rounded overflow-hidden shadow-lg">
+                <div key={idx} className="panel rounded overflow-hidden shadow-lg flex-1 min-w-[320px] max-w-3xl">
                   <div className="p-6 md:p-8">
                     <h3 className="game-title text-2xl md:text-3xl mb-2 break-words">{suspect.name}</h3>
                     <p className="game-subtitle text-base mb-8 text-[color:var(--color-bone-dark)]">{suspect.age} yrs • {suspect.occupation}</p>
@@ -206,7 +206,7 @@ export default function GameScreen() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="w-full max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10"
+              className="w-full grid grid-cols-1 lg:grid-cols-2 gap-10"
             >
               {/* Timeline */}
               <div>
