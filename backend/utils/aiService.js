@@ -57,8 +57,11 @@ OUTPUT FORMAT MUST BE STRICT JSON matching this schema:
 
 DO NOT include any markdown formatting, markdown blocks, or plain text outside the JSON. Return ONLY the JSON object.`;
 
+  const ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
+  const endpoint = `${ollamaUrl.replace(/\/$/, '')}/api/generate`;
+
   try {
-    const response = await fetch('http://localhost:11434/api/generate', {
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
