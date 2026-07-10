@@ -98,7 +98,12 @@ DO NOT include any markdown formatting, markdown blocks, or plain text outside t
 
     const data = await response.json();
     try {
-      const mystery = JSON.parse(data.response);
+      let cleanResponse = data.response.trim();
+      // Remove markdown formatting if Llama includes it accidentally
+      if (cleanResponse.startsWith('```')) {
+        cleanResponse = cleanResponse.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '');
+      }
+      const mystery = JSON.parse(cleanResponse);
       
       // Merge AI generated room data with static DEFAULT_ROOMS config
       mystery.rooms = mergeRooms(mystery.rooms);
