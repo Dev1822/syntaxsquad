@@ -3,7 +3,6 @@ import { LiveKitRoom, RoomAudioRenderer } from '@livekit/components-react';
 import { useGame } from './GameContext.jsx';
 import { fetchVoiceToken } from '../services/voiceApi.js';
 import { useVoiceControls } from '../hooks/useVoice.js';
-import '@livekit/components-styles';
 
 // Outer context to expose token/connection status if needed
 const VoiceContext = createContext(null);
