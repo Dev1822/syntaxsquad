@@ -330,7 +330,7 @@ export default function GameScreen() {
   // ── Room Exploration Phase ──
   if (phase === 'exploring') {
     return (
-      <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+      <div style={{ position: 'absolute', inset: 0, background: '#0a0a0a', zIndex: 50 }}>
         <RoomExploration2D />
 
         {/* Accuse button — shown during investigation */}
