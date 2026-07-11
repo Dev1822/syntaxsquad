@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGame } from '../../contexts/GameContext.jsx';
 import { playClickSound, playHoverSound } from '../../audio/audioEngine.js';
+import ChatPanel from '../lobby/ChatPanel.jsx';
 
 const AVATARS = ['🕵️', '🧙', '💀', '🦇', '🐍', '🌙', '⚗️', '🗡️'];
 
@@ -81,7 +82,7 @@ export default function VotingModal() {
         <motion.div
           initial={{ scale: 0.95, y: 20 }}
           animate={{ scale: 1, y: 0 }}
-          className="w-full max-w-2xl mx-4 flex flex-col"
+          className="w-full max-w-5xl mx-4 flex flex-col md:flex-row"
           style={{
             background: 'linear-gradient(160deg, rgba(10,5,5,0.99), rgba(25,10,10,0.99))',
             border: '1px solid rgba(139,0,0,0.4)',
@@ -91,7 +92,9 @@ export default function VotingModal() {
             overflow: 'hidden'
           }}
         >
-          {/* Header */}
+          {/* Main Voting Panel */}
+          <div className="flex-1 flex flex-col min-w-0">
+            {/* Header */}
           <div
             className="px-8 py-6 border-b"
             style={{ borderColor: 'rgba(139,0,0,0.3)' }}
@@ -233,25 +236,39 @@ export default function VotingModal() {
           </div>
 
           {/* Footer — Cast Vote */}
-          {!hasVoted && (
-            <div className="px-6 py-4 border-t" style={{ borderColor: 'rgba(139,0,0,0.2)' }}>
-              <button
-                onClick={handleCastVote}
-                disabled={!selectedSuspect}
-                onMouseEnter={selectedSuspect ? playHoverSound : undefined}
-                className="w-full py-3 rounded tracking-widest uppercase text-sm transition-all duration-300 disabled:opacity-30"
-                style={{
-                  fontFamily: 'var(--font-family-heading), Cinzel, serif',
-                  background: selectedSuspect ? 'linear-gradient(135deg, rgba(139,0,0,0.85), rgba(100,0,0,0.9))' : 'rgba(40,20,20,0.4)',
-                  color: '#d4c5a9',
-                  border: '1px solid rgba(139,0,0,0.4)',
-                  cursor: selectedSuspect ? 'pointer' : 'not-allowed'
-                }}
-              >
-                {selectedSuspect ? `Vote for ${selectedSuspect}` : 'Select a Suspect'}
-              </button>
-            </div>
-          )}
+            {!hasVoted && (
+              <div className="px-6 py-4 border-t" style={{ borderColor: 'rgba(139,0,0,0.2)' }}>
+                <button
+                  onClick={handleCastVote}
+                  disabled={!selectedSuspect}
+                  onMouseEnter={selectedSuspect ? playHoverSound : undefined}
+                  className="w-full py-3 rounded tracking-widest uppercase text-sm transition-all duration-300 disabled:opacity-30"
+                  style={{
+                    fontFamily: 'var(--font-family-heading), Cinzel, serif',
+                    background: selectedSuspect ? 'linear-gradient(135deg, rgba(139,0,0,0.85), rgba(100,0,0,0.9))' : 'rgba(40,20,20,0.4)',
+                    color: '#d4c5a9',
+                    border: '1px solid rgba(139,0,0,0.4)',
+                    cursor: selectedSuspect ? 'pointer' : 'not-allowed'
+                  }}
+                >
+                  {selectedSuspect ? `Vote for ${selectedSuspect}` : 'Select a Suspect'}
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Right Side Chat Panel */}
+          <div 
+            className="w-full md:w-80 lg:w-96 flex shrink-0"
+            style={{ 
+              borderLeft: '1px solid rgba(139,0,0,0.2)',
+              borderTop: '1px solid rgba(139,0,0,0.2) ',
+              height: 'auto',
+              minHeight: '250px'
+            }}
+          >
+            <ChatPanel />
+          </div>
         </motion.div>
       )}
     </motion.div>
