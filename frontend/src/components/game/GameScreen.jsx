@@ -335,25 +335,21 @@ export default function GameScreen() {
 
         {/* Accuse button — shown during investigation */}
         {gameState === 'investigation' && otherPlayersForAccuse.length > 0 && (
-          <div style={{
-            position: 'fixed', top: 16, right: 16, zIndex: 60
-          }}>
+          <div style={{ position: 'fixed', top: 20, right: 24, zIndex: 60 }}>
             <button
-              onClick={() => setShowAccuseModal(true)}
+              onClick={() => {
+                playClickSound();
+                setShowAccuseModal(true);
+              }}
+              onMouseEnter={playHoverSound}
+              className="premium-btn text-sm px-8 py-3 rounded-full flex items-center justify-center shadow-lg"
               style={{
-                fontFamily: "'Cinzel', serif",
-                fontSize: '0.7rem',
-                fontWeight: 700,
-                letterSpacing: '0.18em',
+                borderColor: 'rgba(218, 165, 32, 0.6)',
+                background: 'rgba(10, 10, 10, 0.85)',
+                color: '#daa520',
                 textTransform: 'uppercase',
-                padding: '9px 20px',
-                background: 'rgba(100,0,0,0.85)',
-                border: '1px solid rgba(200,50,50,0.5)',
-                borderRadius: 4,
-                color: '#fbbaba',
-                cursor: 'pointer',
-                backdropFilter: 'blur(8px)',
-                boxShadow: '0 0 20px rgba(139,0,0,0.3)'
+                letterSpacing: '0.15em',
+                fontWeight: 'bold'
               }}
             >
               ⚖️ Accuse
@@ -368,7 +364,7 @@ export default function GameScreen() {
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               style={{
                 position: 'fixed', inset: 0, zIndex: 80,
-                background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(4px)',
+                background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center'
               }}
               onClick={() => setShowAccuseModal(false)}
@@ -376,21 +372,21 @@ export default function GameScreen() {
               <motion.div
                 initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9 }}
                 onClick={e => e.stopPropagation()}
+                className="glass-panel w-full max-w-md mx-4 p-8 flex flex-col gap-6"
                 style={{
-                  width: '100%', maxWidth: 420, margin: '0 16px',
-                  background: 'linear-gradient(160deg, #0e0808, #1a0a0a)',
-                  border: '1px solid rgba(139,0,0,0.5)',
-                  borderRadius: 10, padding: 28,
-                  boxShadow: '0 0 60px rgba(139,0,0,0.25)'
+                  border: '1px solid rgba(255, 255, 255, 0.08)',
                 }}
               >
-                <h3 style={{ fontFamily: "'Cinzel', serif", color: '#d4c5a9', textAlign: 'center', fontSize: '1.1rem', letterSpacing: '0.15em', marginBottom: 8 }}>
-                  ⚖️ Make an Accusation
-                </h3>
-                <p style={{ color: 'rgba(200,160,120,0.5)', textAlign: 'center', fontSize: '0.78rem', marginBottom: 20, fontFamily: "'Cormorant Garamond', serif" }}>
-                  Choose who you believe committed the murder
-                </p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <div className="text-center">
+                  <h3 className="text-xl md:text-2xl font-bold uppercase tracking-widest text-stone-100" style={{ fontFamily: 'var(--font-family-heading)' }}>
+                    ⚖️ Make an Accusation
+                  </h3>
+                  <p className="text-sm uppercase tracking-wider text-stone-400 font-semibold mt-2" style={{ fontFamily: 'var(--font-family-body)' }}>
+                    Choose who you believe committed the murder
+                  </p>
+                </div>
+                
+                <div className="flex flex-col gap-3">
                   {otherPlayersForAccuse.map(player => (
                     <button
                       key={player.playerId}
@@ -401,24 +397,34 @@ export default function GameScreen() {
                         setDefenseSubmitted(false);
                         setDefenseTimer(60);
                       }}
+                      className="flex items-center gap-4 px-5 py-4 rounded-lg transition-all duration-300"
                       style={{
-                        display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px',
-                        background: 'rgba(30,12,12,0.6)',
-                        border: '1px solid rgba(139,0,0,0.2)',
-                        borderRadius: 6, cursor: 'pointer', textAlign: 'left',
-                        transition: 'border-color 0.2s'
+                        background: 'rgba(255, 255, 255, 0.03)',
+                        border: '1px solid rgba(255, 255, 255, 0.08)',
+                        cursor: 'pointer', textAlign: 'left',
                       }}
+                      onMouseOver={e => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)'}
+                      onMouseOut={e => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)'}
                     >
-                      <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(139,0,0,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', flexShrink: 0 }}>
+                      <div 
+                        className="w-12 h-12 rounded-full flex items-center justify-center text-xl shrink-0"
+                        style={{ background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)' }}
+                      >
                         {['🕵️','🧙','💀','🦇','🐍','🌙','⚗️','🗡️'][player.avatar % 8]}
                       </div>
                       <div>
-                        <p style={{ fontFamily: "'Cinzel', serif", color: '#d4c5a9', fontSize: '0.85rem', margin: 0 }}>{player.name}</p>
+                        <p className="text-lg font-bold text-stone-200" style={{ fontFamily: 'var(--font-family-body)' }}>{player.name}</p>
                       </div>
                     </button>
                   ))}
                 </div>
-                <button onClick={() => setShowAccuseModal(false)} style={{ display: 'block', margin: '16px auto 0', background: 'none', border: 'none', color: 'rgba(200,160,120,0.35)', cursor: 'pointer', fontSize: '0.72rem', fontFamily: "'Cinzel', serif", letterSpacing: '0.15em' }}>[ Cancel ]</button>
+                <button 
+                  onClick={() => setShowAccuseModal(false)} 
+                  className="text-xs uppercase tracking-widest font-bold text-stone-500 hover:text-stone-300 transition-colors mx-auto mt-2" 
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-family-heading)' }}
+                >
+                  [ Cancel ]
+                </button>
               </motion.div>
             </motion.div>
           )}
@@ -429,27 +435,36 @@ export default function GameScreen() {
           {accusationBannerVisible && accusation?.accuserId && gameState === 'accusation' && (
             <motion.div
               initial={{ y: -80, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -80, opacity: 0 }}
+              className="glass-panel"
               style={{
                 position: 'fixed', top: 0, left: 0, right: 0, zIndex: 70,
-                background: 'linear-gradient(135deg, rgba(139,0,0,0.95), rgba(80,0,0,0.98))',
-                borderBottom: '2px solid rgba(200,0,0,0.6)',
-                padding: '14px 24px',
+                borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                borderTop: 'none',
+                borderLeft: 'none',
+                borderRight: 'none',
+                padding: '16px 32px',
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                boxShadow: '0 4px 30px rgba(139,0,0,0.5)'
+                boxShadow: '0 4px 30px rgba(0,0,0,0.5)'
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <span style={{ fontSize: '1.5rem' }}>⚖️</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                <span style={{ fontSize: '2rem' }}>⚖️</span>
                 <div>
-                  <p style={{ fontFamily: "'Cinzel', serif", color: '#fff', fontSize: '0.95rem', letterSpacing: '0.08em', margin: 0 }}>
+                  <p className="font-bold text-stone-100 uppercase tracking-widest text-lg md:text-xl m-0" style={{ fontFamily: 'var(--font-family-heading)' }}>
                     {accusation.accuserName} has accused {accusation.accusedName}!
                   </p>
-                  <p style={{ color: 'rgba(255,200,200,0.7)', fontSize: '0.78rem', margin: '2px 0 0', fontFamily: "'Cormorant Garamond', serif" }}>
+                  <p className="font-semibold text-stone-400 uppercase tracking-wider text-xs md:text-sm mt-1" style={{ fontFamily: 'var(--font-family-body)' }}>
                     {!accusation.defense ? `Defense window: ${defenseTimer}s remaining` : `Defense submitted — ready to vote`}
                   </p>
                 </div>
               </div>
-              <button onClick={() => setAccusationBannerVisible(false)} style={{ background: 'none', border: 'none', color: 'rgba(255,200,200,0.6)', cursor: 'pointer', fontSize: '1rem' }}>✕</button>
+              <button 
+                onClick={() => setAccusationBannerVisible(false)} 
+                className="text-stone-400 hover:text-stone-200 transition-colors"
+                style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.5rem', fontWeight: 'bold' }}
+              >
+                ✕
+              </button>
             </motion.div>
           )}
         </AnimatePresence>
@@ -519,16 +534,16 @@ export default function GameScreen() {
         <AnimatePresence>
           {isHost && gameState === 'accusation' && (
             <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-              style={{ position: 'fixed', bottom: 20, left: '50%', transform: 'translateX(-50%)', zIndex: 70 }}
+              style={{ position: 'fixed', bottom: 32, left: '50%', transform: 'translateX(-50%)', zIndex: 70 }}
             >
               <button
                 onClick={() => actions.startVoting()}
+                className="premium-btn px-10 py-4 text-sm font-bold uppercase tracking-widest rounded-full shadow-2xl"
                 style={{
-                  fontFamily: "'Cinzel', serif", fontSize: '0.72rem', letterSpacing: '0.18em',
-                  textTransform: 'uppercase', padding: '12px 32px',
-                  background: 'linear-gradient(135deg, rgba(80,40,0,0.9), rgba(139,90,0,0.9))',
-                  color: '#daa520', border: '1px solid rgba(218,165,32,0.4)',
-                  boxShadow: '0 0 20px rgba(218,165,32,0.2)', cursor: 'pointer', borderRadius: 4
+                  fontFamily: 'var(--font-family-heading)',
+                  background: 'rgba(10, 10, 10, 0.9)',
+                  color: '#daa520',
+                  borderColor: 'rgba(218,165,32,0.6)',
                 }}
               >
                 ⚖️ Begin the Vote

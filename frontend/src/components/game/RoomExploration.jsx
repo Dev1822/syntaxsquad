@@ -280,20 +280,17 @@ export default function RoomExploration() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="absolute bottom-4 left-1/2 -translate-x-1/2 z-50"
+            className="fixed bottom-12 left-1/2 -translate-x-1/2 z-50"
           >
             <button
               onClick={handleStartVoting}
               onMouseEnter={playHoverSound}
-              className="px-8 py-3 tracking-widest uppercase text-sm transition-all duration-300"
+              className="premium-btn px-10 py-4 tracking-widest uppercase text-sm md:text-base font-bold shadow-2xl rounded-full"
               style={{
-                fontFamily: 'var(--font-family-heading), Cinzel, serif',
-                background: 'linear-gradient(135deg, rgba(80,40,0,0.9), rgba(139,90,0,0.9))',
+                fontFamily: 'var(--font-family-heading)',
+                background: 'rgba(10, 10, 10, 0.9)',
                 color: '#daa520',
-                border: '1px solid rgba(218,165,32,0.4)',
-                boxShadow: '0 0 20px rgba(218,165,32,0.2)',
-                cursor: 'pointer',
-                borderRadius: '4px'
+                borderColor: 'rgba(218,165,32,0.6)',
               }}
             >
               ⚖️ Begin the Vote
@@ -310,29 +307,25 @@ export default function RoomExploration() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="absolute inset-0 z-50 flex items-center justify-center"
-            style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(4px)' }}
+            style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)' }}
             onClick={() => setShowAccuseModal(false)}
           >
             <motion.div
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 20 }}
-              className="w-full max-w-md mx-4 p-6 rounded-lg"
-              style={{
-                background: 'linear-gradient(160deg, rgba(15,8,8,0.99), rgba(30,10,10,0.99))',
-                border: '1px solid rgba(139,0,0,0.5)',
-                boxShadow: '0 0 50px rgba(139,0,0,0.25)'
-              }}
+              className="glass-panel w-full max-w-md mx-4 p-8 flex flex-col gap-6"
+              style={{ border: '1px solid rgba(255, 255, 255, 0.08)' }}
               onClick={e => e.stopPropagation()}
             >
-              <div className="text-center mb-6">
+              <div className="text-center">
                 <h2
-                  className="text-xl tracking-widest"
-                  style={{ fontFamily: 'var(--font-family-heading), Cinzel, serif', color: '#d4c5a9' }}
+                  className="text-xl md:text-2xl font-bold uppercase tracking-widest text-stone-100"
+                  style={{ fontFamily: 'var(--font-family-heading)' }}
                 >
                   ⚖️ Make an Accusation
                 </h2>
-                <p className="text-xs mt-2" style={{ color: 'rgba(200,160,120,0.5)' }}>
+                <p className="text-sm uppercase tracking-wider text-stone-400 font-semibold mt-2" style={{ fontFamily: 'var(--font-family-body)' }}>
                   Choose who you believe committed the murder
                 </p>
               </div>
@@ -343,37 +336,36 @@ export default function RoomExploration() {
                     key={player.playerId}
                     onClick={() => handleAccuse(player.playerId)}
                     onMouseEnter={playHoverSound}
-                    className="flex items-center gap-4 p-4 rounded transition-all duration-200 text-left"
+                    className="flex items-center gap-4 px-5 py-4 rounded-lg transition-all duration-300 text-left"
                     style={{
-                      background: 'rgba(30,15,15,0.6)',
-                      border: '1px solid rgba(139,0,0,0.2)',
+                      background: 'rgba(255, 255, 255, 0.03)',
+                      border: '1px solid rgba(255, 255, 255, 0.08)',
                       cursor: 'pointer'
                     }}
-                    onMouseOver={e => e.currentTarget.style.borderColor = 'rgba(139,0,0,0.6)'}
-                    onMouseOut={e => e.currentTarget.style.borderColor = 'rgba(139,0,0,0.2)'}
+                    onMouseOver={e => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)'}
+                    onMouseOut={e => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)'}
                   >
                     <div
-                      className="w-10 h-10 rounded-full flex items-center justify-center text-lg shrink-0"
-                      style={{ background: 'rgba(139,0,0,0.2)', border: '1px solid rgba(139,0,0,0.3)' }}
+                      className="w-12 h-12 rounded-full flex items-center justify-center text-xl shrink-0"
+                      style={{ background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)' }}
                     >
                       {['🕵️', '🧙', '💀', '🦇', '🐍', '🌙', '⚗️', '🗡️'][player.avatar % 8]}
                     </div>
                     <div>
-                      <p className="text-sm font-medium" style={{ color: '#d4c5a9', fontFamily: 'var(--font-family-heading), Cinzel, serif' }}>
+                      <p className="text-lg font-bold text-stone-200" style={{ fontFamily: 'var(--font-family-body)' }}>
                         {player.name}
                       </p>
-                      <p className="text-xs" style={{ color: 'rgba(200,160,120,0.5)' }}>
+                      <p className="text-xs mt-0.5 uppercase tracking-wider font-semibold text-stone-400" style={{ fontFamily: 'var(--font-family-body)' }}>
                         {mystery?.suspects?.find(s => s.playerId === player.playerId)?.occupation || 'Unknown occupation'}
                       </p>
                     </div>
                   </button>
                 ))}
               </div>
-
-              <button
-                onClick={() => setShowAccuseModal(false)}
-                className="w-full mt-4 py-2 text-xs tracking-wider uppercase transition-colors"
-                style={{ color: 'rgba(200,160,120,0.4)', background: 'none', border: 'none', cursor: 'pointer' }}
+              <button 
+                onClick={() => setShowAccuseModal(false)} 
+                className="text-xs uppercase tracking-widest font-bold text-stone-500 hover:text-stone-300 transition-colors mx-auto mt-2" 
+                style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-family-heading)' }}
               >
                 [ Cancel ]
               </button>

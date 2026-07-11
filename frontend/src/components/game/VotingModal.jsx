@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGame } from '../../contexts/GameContext.jsx';
 import { playClickSound, playHoverSound } from '../../audio/audioEngine.js';
-import ChatPanel from '../lobby/ChatPanel.jsx';
 
 const AVATARS = ['🕵️', '🧙', '💀', '🦇', '🐍', '🌙', '⚗️', '🗡️'];
 
@@ -24,28 +23,19 @@ export default function VotingModal() {
   const votesCast = votingPhase?.votesCast || 0;
   const totalPlayers = (room?.players || []).filter(p => p.isConnected).length;
 
-  // Show results when they arrive
   useEffect(() => {
-    if (votingResults) {
-      setShowResults(true);
-    }
+    if (votingResults) setShowResults(true);
   }, [votingResults]);
 
-  // Countdown timer
   useEffect(() => {
     if (!votingPhase?.isActive || hasVoted || showResults) return;
     setTimeLeft(votingPhase.timeLimit || 120);
-
     const interval = setInterval(() => {
       setTimeLeft(prev => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          return 0;
-        }
+        if (prev <= 1) { clearInterval(interval); return 0; }
         return prev - 1;
       });
     }, 1000);
-
     return () => clearInterval(interval);
   }, [votingPhase?.isActive, hasVoted, showResults]);
 
@@ -56,10 +46,9 @@ export default function VotingModal() {
     setHasVoted(true);
   };
 
-  const timerColor = timeLeft > 60 ? '#4ade80' : timeLeft > 30 ? '#facc15' : '#f87171';
   const timerPct = (timeLeft / (votingPhase?.timeLimit || 120)) * 100;
+  const timerColor = timeLeft > 60 ? '#4ade80' : timeLeft > 30 ? '#facc15' : '#f87171';
 
-  // Don't render if voting isn't active
   if (gameState !== 'voting' && !showResults) return null;
 
   return (
@@ -68,7 +57,7 @@ export default function VotingModal() {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-[70] flex items-center justify-center"
-      style={{ background: 'rgba(0,0,0,0.93)', backdropFilter: 'blur(6px)' }}
+      style={{ background: 'rgba(0,0,0,0.88)', backdropFilter: 'blur(12px)' }}
     >
       {/* Results Modal */}
       <AnimatePresence>
@@ -82,38 +71,30 @@ export default function VotingModal() {
         <motion.div
           initial={{ scale: 0.95, y: 20 }}
           animate={{ scale: 1, y: 0 }}
-          className="w-full max-w-5xl mx-4 flex flex-col md:flex-row"
+          className="glass-panel w-full max-w-2xl mx-4 flex flex-col"
           style={{
-            background: 'linear-gradient(160deg, rgba(10,5,5,0.99), rgba(25,10,10,0.99))',
-            border: '1px solid rgba(139,0,0,0.4)',
-            boxShadow: '0 0 80px rgba(139,0,0,0.2)',
-            borderRadius: '8px',
             maxHeight: '90vh',
-            overflow: 'hidden'
+            overflow: 'hidden',
+            border: '1px solid rgba(255,255,255,0.08)'
           }}
         >
-          {/* Main Voting Panel */}
-          <div className="flex-1 flex flex-col min-w-0">
-            {/* Header */}
-          <div
-            className="px-8 py-6 border-b"
-            style={{ borderColor: 'rgba(139,0,0,0.3)' }}
-          >
+          {/* Header */}
+          <div className="px-8 py-6" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
             <div className="flex items-center justify-between mb-4">
               <h2
-                className="text-2xl tracking-[0.2em] uppercase"
-                style={{ fontFamily: 'var(--font-family-heading), Cinzel, serif', color: '#d4c5a9' }}
+                className="text-2xl md:text-3xl font-bold uppercase tracking-widest text-stone-100"
+                style={{ fontFamily: 'var(--font-family-heading)' }}
               >
                 ⚖️ Cast Your Vote
               </h2>
               {/* Timer */}
               <div className="flex flex-col items-end gap-1">
-                <span className="text-2xl font-mono font-bold" style={{ color: timerColor }}>
+                <span className="text-3xl font-mono font-bold" style={{ color: timerColor }}>
                   {timeLeft}s
                 </span>
-                <div className="w-24 h-1 rounded-full" style={{ background: 'rgba(255,255,255,0.1)' }}>
-                  <motion.div
-                    className="h-1 rounded-full"
+                <div className="w-24 h-1.5 rounded-full" style={{ background: 'rgba(255,255,255,0.08)' }}>
+                  <div
+                    className="h-1.5 rounded-full transition-all"
                     style={{ background: timerColor, width: `${timerPct}%`, transition: 'width 1s linear, background 1s' }}
                   />
                 </div>
@@ -122,10 +103,10 @@ export default function VotingModal() {
 
             {/* Accusation context */}
             {accusation?.accusedName && (
-              <p className="text-sm" style={{ color: 'rgba(200,160,120,0.6)' }}>
+              <p className="text-sm text-stone-400 font-semibold uppercase tracking-wider" style={{ fontFamily: 'var(--font-family-body)' }}>
                 {accusation.accuserName} accused {accusation.accusedName}.{' '}
                 {accusation.defense && (
-                  <span style={{ color: 'rgba(150,220,150,0.7)' }}>
+                  <span className="text-green-400 normal-case font-normal">
                     Defense: "{accusation.defense.slice(0, 60)}{accusation.defense.length > 60 ? '...' : ''}"
                   </span>
                 )}
@@ -133,15 +114,15 @@ export default function VotingModal() {
             )}
 
             {/* Vote progress */}
-            <div className="flex items-center gap-3 mt-3">
-              <div className="flex-1 h-1.5 rounded-full" style={{ background: 'rgba(255,255,255,0.08)' }}>
+            <div className="flex items-center gap-3 mt-4">
+              <div className="flex-1 h-1.5 rounded-full" style={{ background: 'rgba(255,255,255,0.06)' }}>
                 <motion.div
                   className="h-1.5 rounded-full"
-                  style={{ background: 'rgba(218,165,32,0.7)', width: totalPlayers > 0 ? `${(votesCast / totalPlayers) * 100}%` : '0%' }}
+                  style={{ background: 'rgba(218,165,32,0.8)', width: totalPlayers > 0 ? `${(votesCast / totalPlayers) * 100}%` : '0%' }}
                   layout
                 />
               </div>
-              <span className="text-xs font-mono shrink-0" style={{ color: 'rgba(218,165,32,0.7)' }}>
+              <span className="text-xs font-mono font-bold shrink-0 text-stone-400 uppercase tracking-wider">
                 {votesCast}/{totalPlayers} voted
               </span>
             </div>
@@ -155,18 +136,15 @@ export default function VotingModal() {
                 animate={{ opacity: 1, y: 0 }}
                 className="flex flex-col items-center justify-center py-12 gap-4"
               >
-                <span className="text-5xl">✓</span>
-                <p
-                  className="text-xl tracking-wider"
-                  style={{ fontFamily: 'var(--font-family-heading), Cinzel, serif', color: '#d4c5a9' }}
-                >
+                <span className="text-6xl">✓</span>
+                <p className="text-2xl font-bold uppercase tracking-widest text-stone-100" style={{ fontFamily: 'var(--font-family-heading)' }}>
                   Vote Cast
                 </p>
-                <p className="text-sm" style={{ color: 'rgba(200,160,120,0.5)' }}>
+                <p className="text-sm font-semibold uppercase tracking-wider text-stone-400" style={{ fontFamily: 'var(--font-family-body)' }}>
                   You voted for <span style={{ color: '#daa520' }}>{selectedSuspect}</span>
                 </p>
-                <p className="text-xs mt-2" style={{ color: 'rgba(200,160,120,0.4)' }}>
-                  Waiting for other players... ({votesCast}/{totalPlayers})
+                <p className="text-xs text-stone-500 mt-2 uppercase tracking-wider">
+                  Waiting for others... ({votesCast}/{totalPlayers})
                 </p>
               </motion.div>
             ) : (
@@ -181,50 +159,41 @@ export default function VotingModal() {
                       transition={{ delay: idx * 0.05 }}
                       onClick={() => { playClickSound(); setSelectedSuspect(suspect.name); }}
                       onMouseEnter={playHoverSound}
-                      className="p-4 rounded text-left transition-all duration-300 relative overflow-hidden"
+                      className="p-4 rounded-xl text-left transition-all duration-300 relative overflow-hidden"
                       style={{
-                        background: isSelected
-                          ? 'linear-gradient(135deg, rgba(139,0,0,0.25), rgba(100,0,0,0.3))'
-                          : 'rgba(20,12,12,0.6)',
-                        border: `1px solid ${isSelected ? 'rgba(200,50,50,0.6)' : 'rgba(139,0,0,0.18)'}`,
-                        boxShadow: isSelected ? '0 0 20px rgba(139,0,0,0.2)' : 'none',
+                        background: isSelected ? 'rgba(218, 165, 32, 0.1)' : 'rgba(255,255,255,0.03)',
+                        border: `1px solid ${isSelected ? 'rgba(218, 165, 32, 0.5)' : 'rgba(255,255,255,0.08)'}`,
+                        boxShadow: isSelected ? '0 0 20px rgba(218,165,32,0.15)' : 'none',
                         cursor: 'pointer'
                       }}
                     >
-                      {isSelected && (
-                        <motion.div
-                          layoutId="selected-vote"
-                          className="absolute inset-0 opacity-10"
-                          style={{ background: 'radial-gradient(circle at center, #ff0000, transparent)' }}
-                        />
-                      )}
                       <div className="flex items-center gap-3 mb-2">
                         <div
-                          className="w-10 h-10 rounded-full flex items-center justify-center text-xl shrink-0"
+                          className="w-12 h-12 rounded-full flex items-center justify-center text-2xl shrink-0"
                           style={{
-                            background: isSelected ? 'rgba(139,0,0,0.3)' : 'rgba(30,15,15,0.6)',
-                            border: `1px solid ${isSelected ? 'rgba(200,50,50,0.4)' : 'rgba(139,0,0,0.2)'}`
+                            background: isSelected ? 'rgba(218,165,32,0.15)' : 'rgba(255,255,255,0.05)',
+                            border: `1px solid ${isSelected ? 'rgba(218,165,32,0.3)' : 'rgba(255,255,255,0.1)'}`
                           }}
                         >
                           {AVATARS[idx % AVATARS.length]}
                         </div>
-                        <div>
+                        <div className="flex-1">
                           <p
-                            className="font-medium text-sm"
-                            style={{ fontFamily: 'var(--font-family-heading), Cinzel, serif', color: isSelected ? '#fff' : '#d4c5a9' }}
+                            className="font-bold text-base"
+                            style={{ fontFamily: 'var(--font-family-body)', color: isSelected ? '#daa520' : '#f0ece6' }}
                           >
                             {suspect.name}
                           </p>
-                          <p className="text-xs" style={{ color: 'rgba(200,160,120,0.5)' }}>
+                          <p className="text-xs uppercase tracking-wider font-semibold text-stone-500">
                             {suspect.occupation}
                           </p>
                         </div>
                         {isSelected && (
-                          <span className="ml-auto text-sm" style={{ color: 'rgba(255,100,100,0.9)' }}>✓</span>
+                          <span className="text-xl" style={{ color: '#daa520' }}>✓</span>
                         )}
                       </div>
                       {suspect.physicalDescription && (
-                        <p className="text-xs leading-relaxed" style={{ color: 'rgba(200,160,120,0.45)' }}>
+                        <p className="text-xs leading-relaxed text-stone-400 mt-1">
                           {suspect.physicalDescription.slice(0, 80)}{suspect.physicalDescription.length > 80 ? '...' : ''}
                         </p>
                       )}
@@ -236,39 +205,25 @@ export default function VotingModal() {
           </div>
 
           {/* Footer — Cast Vote */}
-            {!hasVoted && (
-              <div className="px-6 py-4 border-t" style={{ borderColor: 'rgba(139,0,0,0.2)' }}>
-                <button
-                  onClick={handleCastVote}
-                  disabled={!selectedSuspect}
-                  onMouseEnter={selectedSuspect ? playHoverSound : undefined}
-                  className="w-full py-3 rounded tracking-widest uppercase text-sm transition-all duration-300 disabled:opacity-30"
-                  style={{
-                    fontFamily: 'var(--font-family-heading), Cinzel, serif',
-                    background: selectedSuspect ? 'linear-gradient(135deg, rgba(139,0,0,0.85), rgba(100,0,0,0.9))' : 'rgba(40,20,20,0.4)',
-                    color: '#d4c5a9',
-                    border: '1px solid rgba(139,0,0,0.4)',
-                    cursor: selectedSuspect ? 'pointer' : 'not-allowed'
-                  }}
-                >
-                  {selectedSuspect ? `Vote for ${selectedSuspect}` : 'Select a Suspect'}
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Right Side Chat Panel */}
-          <div 
-            className="w-full md:w-80 lg:w-96 flex shrink-0"
-            style={{ 
-              borderLeft: '1px solid rgba(139,0,0,0.2)',
-              borderTop: '1px solid rgba(139,0,0,0.2) ',
-              height: 'auto',
-              minHeight: '250px'
-            }}
-          >
-            <ChatPanel />
-          </div>
+          {!hasVoted && (
+            <div className="px-6 py-5" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+              <button
+                onClick={handleCastVote}
+                disabled={!selectedSuspect}
+                onMouseEnter={selectedSuspect ? playHoverSound : undefined}
+                className="premium-btn w-full py-4 rounded-full tracking-widest uppercase text-sm font-bold transition-all duration-300 disabled:opacity-30"
+                style={{
+                  fontFamily: 'var(--font-family-heading)',
+                  background: selectedSuspect ? 'rgba(10,10,10,0.9)' : 'rgba(40,40,40,0.4)',
+                  color: selectedSuspect ? '#daa520' : 'rgba(200,200,200,0.4)',
+                  borderColor: selectedSuspect ? 'rgba(218,165,32,0.6)' : 'rgba(255,255,255,0.08)',
+                  cursor: selectedSuspect ? 'pointer' : 'not-allowed'
+                }}
+              >
+                {selectedSuspect ? `Vote for ${selectedSuspect}` : 'Select a Suspect First'}
+              </button>
+            </div>
+          )}
         </motion.div>
       )}
     </motion.div>
@@ -278,7 +233,6 @@ export default function VotingModal() {
 // ── Results Modal ──────────────────────────────────────
 function ResultsModal({ votingResults, room, suspects }) {
   const { voteCounts = {}, winner, isTie } = votingResults;
-  const murderer = room?.mysteryData?.murderer; // Only available after reveal
   const maxVotes = Math.max(...Object.values(voteCounts), 1);
 
   return (
@@ -286,42 +240,38 @@ function ResultsModal({ votingResults, room, suspects }) {
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       className="fixed inset-0 z-[80] flex items-center justify-center"
-      style={{ background: 'rgba(0,0,0,0.95)' }}
+      style={{ background: 'rgba(0,0,0,0.92)', backdropFilter: 'blur(12px)' }}
     >
       <motion.div
         initial={{ y: 30 }}
         animate={{ y: 0 }}
-        className="w-full max-w-lg mx-4 p-8 rounded-lg"
-        style={{
-          background: 'linear-gradient(160deg, rgba(10,5,5,0.99), rgba(20,10,10,0.99))',
-          border: '1px solid rgba(139,0,0,0.4)',
-          boxShadow: '0 0 80px rgba(139,0,0,0.25)'
-        }}
+        className="glass-panel w-full max-w-lg mx-4 p-8 flex flex-col gap-6"
+        style={{ border: '1px solid rgba(255,255,255,0.08)' }}
       >
-        <div className="text-center mb-8">
+        <div className="text-center">
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: 'spring', delay: 0.2 }}
-            className="text-5xl mb-4"
+            className="text-6xl mb-4"
           >
             ⚖️
           </motion.div>
           <h2
-            className="text-2xl tracking-[0.2em] uppercase"
-            style={{ fontFamily: 'var(--font-family-heading), Cinzel, serif', color: '#d4c5a9' }}
+            className="text-2xl md:text-3xl font-bold uppercase tracking-widest text-stone-100"
+            style={{ fontFamily: 'var(--font-family-heading)' }}
           >
             {isTie ? 'The Vote is Split' : 'The Jury Has Spoken'}
           </h2>
           {isTie && (
-            <p className="text-sm mt-2" style={{ color: 'rgba(200,160,120,0.6)' }}>
+            <p className="text-sm mt-2 text-stone-400 font-semibold uppercase tracking-wider" style={{ fontFamily: 'var(--font-family-body)' }}>
               No clear majority — the truth remains veiled...
             </p>
           )}
         </div>
 
         {/* Vote bars */}
-        <div className="space-y-4 mb-8">
+        <div className="flex flex-col gap-4">
           {suspects
             .sort((a, b) => (voteCounts[b.name] || 0) - (voteCounts[a.name] || 0))
             .map((suspect, idx) => {
@@ -335,17 +285,17 @@ function ResultsModal({ votingResults, room, suspects }) {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: idx * 0.1 }}
                 >
-                  <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center justify-between mb-1.5">
                     <span
-                      className="text-sm"
+                      className="text-sm font-bold uppercase tracking-widest"
                       style={{
-                        fontFamily: 'var(--font-family-heading), Cinzel, serif',
-                        color: isWinner ? '#daa520' : '#d4c5a9'
+                        fontFamily: 'var(--font-family-body)',
+                        color: isWinner ? '#daa520' : '#e2ddd8'
                       }}
                     >
                       {suspect.name} {isWinner && '⚖️'}
                     </span>
-                    <span className="text-xs font-mono" style={{ color: 'rgba(200,160,120,0.6)' }}>
+                    <span className="text-xs font-mono font-bold text-stone-400">
                       {count} vote{count !== 1 ? 's' : ''}
                     </span>
                   </div>
@@ -357,8 +307,8 @@ function ResultsModal({ votingResults, room, suspects }) {
                       transition={{ duration: 0.8, delay: idx * 0.1 + 0.3 }}
                       style={{
                         background: isWinner
-                          ? 'linear-gradient(90deg, rgba(218,165,32,0.8), rgba(180,130,20,0.9))'
-                          : 'linear-gradient(90deg, rgba(139,0,0,0.6), rgba(100,0,0,0.7))'
+                          ? 'linear-gradient(90deg, #daa520, #b8860b)'
+                          : 'rgba(255,255,255,0.15)'
                       }}
                     />
                   </div>
@@ -371,8 +321,8 @@ function ResultsModal({ votingResults, room, suspects }) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8 }}
-          className="text-center text-sm"
-          style={{ color: 'rgba(200,160,120,0.5)', fontFamily: 'var(--font-family-heading), Cinzel, serif' }}
+          className="text-center text-sm font-semibold uppercase tracking-widest text-stone-500"
+          style={{ fontFamily: 'var(--font-family-heading)' }}
         >
           Prepare yourself for the truth...
         </motion.p>
