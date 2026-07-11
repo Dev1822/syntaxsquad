@@ -1,5 +1,6 @@
 import { useEffect, memo } from 'react';
 import { useGame } from './contexts/GameContext.jsx';
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import BackgroundScene from './components/BackgroundScene.jsx';
 import CustomCursor from './components/CustomCursor.jsx';
 import AudioControls from './components/AudioControls.jsx';
@@ -12,6 +13,25 @@ import { playClickSound, playHoverSound } from './audio/audioEngine.js';
 
 function AppContent() {
   const { state, actions, dispatch } = useGame();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Sync URL with screen state
+  useEffect(() => {
+    const screenToPath = {
+      'intro': '/',
+      'menu': '/menu',
+      'lobby': '/lobby',
+      'countdown': '/lobby',
+      'generating': '/generating',
+      'game': '/game'
+    };
+    
+    const targetPath = screenToPath[state.screen] || '/';
+    if (location.pathname !== targetPath) {
+      navigate(targetPath, { replace: true });
+    }
+  }, [state.screen, navigate, location.pathname]);
 
   // Handle URL params for joining via invite link
   useEffect(() => {
@@ -19,8 +39,6 @@ function AppContent() {
       const urlParams = new URLSearchParams(window.location.search);
       const code = urlParams.get('code');
       if (code && code.length === 4 && state.screen === 'menu') {
-        // We could auto-open join modal here, but for simplicity we'll let user click
-        // Or better yet, we can intercept and show a specialized join prompt
         console.log('Invited to room:', code);
       }
     }
@@ -94,7 +112,10 @@ function AppContent() {
                 You have been removed from the session.
               </p>
               <button
-                onClick={() => dispatch({ type: 'RESET' })}
+                onClick={() => {
+                  dispatch({ type: 'RESET' });
+                  navigate('/menu');
+                }}
                 className="mt-8 text-sm transition-colors duration-200"
                 style={{ color: 'rgba(255,255,255,0.4)', cursor: 'pointer', background: 'none', border: 'none', fontFamily: 'monospace' }}
               >

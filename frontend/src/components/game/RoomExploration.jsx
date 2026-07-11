@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { useGame } from '../../contexts/GameContext.jsx';
 import { playClickSound, playHoverSound } from '../../audio/audioEngine.js';
 import modalBg from '../../assets/modal-bg.png';
 
 export default function RoomExploration() {
   const { state, actions } = useGame();
+  const navigate = useNavigate();
   const mystery = state.room?.mysteryData;
   const rooms = mystery?.rooms || [];
 
@@ -72,7 +74,7 @@ export default function RoomExploration() {
             [ {showMap ? 'Close Map' : 'Map'} ]
           </button>
           <button
-            onClick={() => { playClickSound(); actions.closeRoom(); window.location.href = '/'; }}
+            onClick={() => { playClickSound(); actions.closeRoom(); navigate('/menu'); }}
             onMouseEnter={playHoverSound}
             className="text-sm tracking-wider uppercase transition-colors"
             style={{ fontFamily: 'var(--font-family-heading), Cinzel, serif', color: 'rgba(200, 80, 80, 0.5)', cursor: 'pointer', background: 'none', border: 'none' }}

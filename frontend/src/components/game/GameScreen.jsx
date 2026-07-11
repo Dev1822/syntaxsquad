@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useGame } from '../../contexts/GameContext.jsx';
 import { useVoice } from '../../contexts/VoiceContext.jsx';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { playClickSound, playHoverSound, setMuted } from '../../audio/audioEngine.js';
 import RoomExploration2D from './RoomExploration2D.jsx';
@@ -277,6 +278,7 @@ function EnterBtn({ onClick, onMouseEnter }) {
 export default function GameScreen() {
   const { state, actions } = useGame();
   const { isMuted, toggleMute, micError } = useVoice();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('role');
   const [phase, setPhase] = useState('briefing');
   const [musicMuted, setMusicMuted] = useState(false);
@@ -356,7 +358,10 @@ export default function GameScreen() {
 
           <HeaderBtn
             danger
-            onClick={() => { actions.closeRoom(); window.location.href = '/'; }}
+            onClick={() => {
+              actions.closeRoom();
+              navigate('/menu');
+            }}
           >
             Leave Game
           </HeaderBtn>

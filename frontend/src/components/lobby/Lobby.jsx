@@ -1,5 +1,6 @@
 import { memo, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { useGame } from '../../contexts/GameContext.jsx';
 import { playClickSound, playHoverSound, setMuted } from '../../audio/audioEngine.js';
 import PlayerList from './PlayerList.jsx';
@@ -11,6 +12,7 @@ import { useVoice } from '../../contexts/VoiceContext.jsx';
 
 function Lobby() {
   const { state, actions } = useGame();
+  const navigate = useNavigate();
   const { isMuted, toggleMute, micError } = useVoice();
   const { room, playerId } = state;
   const [musicMuted, setMusicMuted] = useState(false);
@@ -147,6 +149,7 @@ function Lobby() {
                 onClick={() => {
                   playClickSound();
                   actions.leaveRoom();
+                  navigate('/menu');
                 }}
                 onMouseEnter={playHoverSound}
                 className="horror-btn text-lg px-12 py-5"
