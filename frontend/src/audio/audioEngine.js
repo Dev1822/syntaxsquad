@@ -319,6 +319,109 @@ export function stopAmbience() {
   ambienceNodes = [];
 }
 
+// ─── Footstep Sounds ───
+let footstepInterval = null;
+let isFootstepPlaying = false;
+
+export function playFootstep() {
+  try {
+    const { ctx, master } = getAudioContext();
+
+    // Create a slightly longer noise burst for a heavier footstep
+    const bufferSize = Math.floor(ctx.sampleRate * 0.15);
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+
+    for (let i = 0; i < bufferSize; i++) {
+      const t = i / ctx.sampleRate;
+      const envelope = Math.exp(-t * 20); // Slower decay for more body
+      data[i] = (Math.random() * 2 - 1) * envelope;
+    }
+
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+
+    // Bandpass filter to shape the noise into a solid thud
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.value = 150 + Math.random() * 50; // Lower pitch for heavy step
+    filter.Q.value = 1.0; // Wider band for more click/thud
+
+    // Low-pass to remove harshness
+    const lpFilter = ctx.createBiquadFilter();
+    lpFilter.type = 'lowpass';
+    lpFilter.frequency.value = 600;
+
+    const gain = ctx.createGain();
+    // Significantly louder gain
+    gain.gain.setValueAtTime(0.8 + Math.random() * 0.2, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+
+    source.connect(filter);
+    filter.connect(lpFilter);
+    lpFilter.connect(gain);
+    gain.connect(master);
+
+    source.start(ctx.currentTime);
+  } catch (e) { /* silent fail */ }
+}
+
+// ─── Evidence Collected Sound ───
+export function playEvidenceSound() {
+  try {
+    const { ctx, master } = getAudioContext();
+    
+    // A mysterious, shimmering chord
+    const freqs = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+    
+    freqs.forEach((freq, index) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, ctx.currentTime);
+      // Slight pitch bend for mysterious effect
+      osc.frequency.exponentialRampToValueAtTime(freq * 1.02, ctx.currentTime + 1.5);
+      
+      // Staggered attacks for a "sparkle" effect
+      const startTime = ctx.currentTime + (index * 0.05);
+      
+      gain.gain.setValueAtTime(0, ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.15, startTime + 0.1);
+      gain.gain.exponentialRampToValueAtTime(0.001, startTime + 1.5);
+      
+      osc.connect(gain);
+      gain.connect(master);
+      
+      osc.start(startTime);
+      osc.stop(startTime + 1.5);
+    });
+  } catch (e) { /* silent fail */ }
+}
+
+export function startFootsteps() {
+  if (isFootstepPlaying) return;
+  isFootstepPlaying = true;
+
+  // Play one immediately
+  playFootstep();
+
+  // Then repeat at ~280ms intervals (walking pace)
+  footstepInterval = setInterval(() => {
+    if (isFootstepPlaying) {
+      playFootstep();
+    }
+  }, 280);
+}
+
+export function stopFootsteps() {
+  isFootstepPlaying = false;
+  if (footstepInterval) {
+    clearInterval(footstepInterval);
+    footstepInterval = null;
+  }
+}
+
 export function setMasterVolume(value) {
   if (masterGain) {
     masterGain.gain.value = Math.max(0, Math.min(1, value));

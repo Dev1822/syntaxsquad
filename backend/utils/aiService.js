@@ -48,8 +48,8 @@ OUTPUT FORMAT MUST BE STRICT JSON matching this schema:
   ],
   "rooms": [
     {
-      "id": "string (MUST be one of: hallway, library, study, kitchen, garden, dining_room)",
-      "name": "string (e.g., 'Dusty Library')",
+      "id": "string (MUST EXACTLY MATCH one of these: hallway, garage, basement, library, kitchen, study, dining_room, room_1, bathroom, conservatory, room_2, observatory, room_3)",
+      "name": "string (e.g., 'Dusty Library', 'Bloodstained Kitchen', 'Abandoned Garage')",
       "description": "string (detailed spooky description)",
       "clues": [
         {
@@ -57,7 +57,7 @@ OUTPUT FORMAT MUST BE STRICT JSON matching this schema:
           "description": "string (what the clue reveals)",
           "isSupernatural": "boolean"
         }
-      ]
+      ] // YOU MUST GENERATE 3 TO 5 CLUES FOR EVERY SINGLE ROOM.
     }
   ],
   "murderer": "string (MUST EXACTLY MATCH one of the suspect names)",
@@ -156,7 +156,21 @@ function getFallbackMystery(playerCount) {
     })),
     timeline: [{ time: "23:00", event: "The lights went out." }],
     initialClues: [{ name: "Shattered Glass", description: "Found near the body." }],
-    rooms: DEFAULT_ROOMS.map(room => ({
+    rooms: [
+      { id: 'hallway', name: 'Hallway', description: 'A dark, echoing entrance hallway.' },
+      { id: 'garage', name: 'Garage', description: 'Oil stains and rusty tools.' },
+      { id: 'basement', name: 'Basement', description: 'Cold stone and forgotten barrels.' },
+      { id: 'library', name: 'Library', description: 'Towering shelves of decaying books.' },
+      { id: 'kitchen', name: 'Kitchen', description: 'Smells of rotting meat and iron.' },
+      { id: 'study', name: 'Study', description: 'A messy desk covered in frantic writings.' },
+      { id: 'dining_room', name: 'Dining Room', description: 'A long table set for a feast that never happened.' },
+      { id: 'room_1', name: 'Master Bedroom', description: 'An ornate bed with torn velvet curtains.' },
+      { id: 'bathroom', name: 'Bathroom', description: 'A cracked mirror and a rusted tub.' },
+      { id: 'conservatory', name: 'Conservatory', description: 'Overgrown dead plants.' },
+      { id: 'room_2', name: 'Billiard Room', description: 'A dusty pool table.' },
+      { id: 'observatory', name: 'Observatory', description: 'A large brass telescope pointed at the stars.' },
+      { id: 'room_3', name: 'Guest Bedroom', description: 'An unsettlingly neat bed.' }
+    ].map(room => ({
       ...room,
       clues: getFallbackCluesForRoom(room.id)
     })),
@@ -171,22 +185,64 @@ function getFallbackMystery(playerCount) {
 function getFallbackCluesForRoom(roomId) {
   const cluesByRoom = {
     hallway: [
-      { name: "Flickering Chandelier", description: "The chain appears rusted through, almost as if deliberately cut.", isSupernatural: false }
+      { name: "Flickering Chandelier", description: "The chain appears rusted through, almost as if deliberately cut.", isSupernatural: false },
+      { name: "Muddy Footprints", description: "Someone walked through here recently, tracking in soil.", isSupernatural: false },
+      { name: "Cold Draft", description: "An unnatural breeze chills you to the bone.", isSupernatural: true }
+    ],
+    garage: [
+      { name: "Bloody Wrench", description: "Hidden under a rag, covered in dried blood.", isSupernatural: false },
+      { name: "Missing Keys", description: "The keys to the old estate car are gone.", isSupernatural: false },
+      { name: "Phantom Engine", description: "You swear you can hear an engine idling, but the car is cold.", isSupernatural: true }
+    ],
+    basement: [
+      { name: "Ripped Fabric", description: "A piece of a fancy suit caught on a barrel.", isSupernatural: false },
+      { name: "Shattered Lantern", description: "Someone dropped this in a hurry.", isSupernatural: false },
+      { name: "Whispering Shadows", description: "The darkness seems to speak your name.", isSupernatural: true }
     ],
     library: [
-      { name: "Tattered Diary Entry", description: "Spooky ramblings mentioning shadows that move on their own.", isSupernatural: true }
+      { name: "Tattered Diary Entry", description: "Spooky ramblings mentioning shadows that move on their own.", isSupernatural: true },
+      { name: "Missing Book", description: "A gap in the shelf where a book on poisons used to be.", isSupernatural: false },
+      { name: "Burnt Letter", description: "Only the words 'meet me tonight' are legible.", isSupernatural: false }
     ],
     study: [
-      { name: "Unsent Blackmail Letter", description: "A threatening note written by Guest 1 targeting the victim's debts.", isSupernatural: false }
+      { name: "Unsent Blackmail Letter", description: "A threatening note written by Guest 1 targeting the victim's debts.", isSupernatural: false },
+      { name: "Hidden Safe", description: "The safe is wide open and empty.", isSupernatural: false },
+      { name: "Bleeding Ink", description: "The ink well seems to be filled with fresh blood.", isSupernatural: true }
     ],
     kitchen: [
-      { name: "Empty Vials of Cyanide", description: "Hidden behind the rotting wooden drawers.", isSupernatural: false }
-    ],
-    garden: [
-      { name: "Cracked Gravestone", description: "The glowing soil surrounding it hums with eerie, otherworldly whispers.", isSupernatural: true }
+      { name: "Empty Vials of Cyanide", description: "Hidden behind the rotting wooden drawers.", isSupernatural: false },
+      { name: "Half-Eaten Meal", description: "Someone left in a rush.", isSupernatural: false },
+      { name: "Rattling Knives", description: "The knives in the block seem to vibrate on their own.", isSupernatural: true }
     ],
     dining_room: [
-      { name: "Tipped Wine Glass", description: "A white residue is visible on the rim, smelling faintly of almonds.", isSupernatural: false }
+      { name: "Tipped Wine Glass", description: "A white residue is visible on the rim, smelling faintly of almonds.", isSupernatural: false },
+      { name: "Torn Place Card", description: "Guest 2's name was crossed out violently.", isSupernatural: false },
+      { name: "Cold Breath", description: "You see your breath, though the room is warm.", isSupernatural: true }
+    ],
+    room_1: [
+      { name: "Smashed Pocket Watch", description: "Stopped exactly at midnight.", isSupernatural: false },
+      { name: "Strange Pillbox", description: "Contains unmarked white tablets.", isSupernatural: false },
+      { name: "Crying Portrait", description: "The painting seems to be shedding tears.", isSupernatural: true }
+    ],
+    bathroom: [
+      { name: "Bloody Towel", description: "Hastily stuffed behind the toilet.", isSupernatural: false },
+      { name: "Scratched Mirror", description: "The words 'I KNOW' are scratched into the glass.", isSupernatural: false }
+    ],
+    conservatory: [
+      { name: "Poisonous Plant", description: "A rare, toxic flower has been recently harvested.", isSupernatural: false },
+      { name: "Footprints in Dirt", description: "Leading towards the window.", isSupernatural: false }
+    ],
+    room_2: [
+      { name: "Broken Cue Stick", description: "Snapped in half, possibly used as a weapon.", isSupernatural: false },
+      { name: "Chalk Dust", description: "A trail of chalk dust leads to the door.", isSupernatural: false }
+    ],
+    observatory: [
+      { name: "Smashed Lens", description: "The main telescope lens has been shattered.", isSupernatural: false },
+      { name: "Star Chart", description: "Strange calculations predicting a death tonight.", isSupernatural: true }
+    ],
+    room_3: [
+      { name: "Packed Suitcase", description: "Someone was planning to leave abruptly.", isSupernatural: false },
+      { name: "Hidden Gun", description: "A revolver with one bullet missing found under the pillow.", isSupernatural: false }
     ]
   };
 

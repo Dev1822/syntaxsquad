@@ -4,16 +4,52 @@ import { useGame } from '../../contexts/GameContext.jsx';
 import socket from '../../socket/socket.js';
 import useGameLoop from '../../hooks/useGameLoop.js';
 import { LAYOUT, generateWalls, MAP_WIDTH, MAP_HEIGHT } from './mapLayout.js';
+import { startFootsteps, stopFootsteps, playEvidenceSound } from '../../audio/audioEngine.js';
 
 import woodFloor from '../../assets/wood_floor.png';
 import stoneFloor from '../../assets/stone_floor.png';
 import wallTexture from '../../assets/wall_texture.png';
+import playerSprite from '../../assets/player_sprite.png';
+
+import libraryBg from '../../assets/library_bg.png';
+import studyBg from '../../assets/study_bg.png';
+import kitchenBg from '../../assets/kitchen_bg.png';
+import diningBg from '../../assets/dining_bg.png';
+import bedroomBg from '../../assets/bedroom_bg.png';
+import bathroomBg from '../../assets/bathroom_bg.png';
+
+import hallwayDecor from '../../assets/hallway_decor.png';
+import garageDecor from '../../assets/garage_decor.png';
+import basementDecor from '../../assets/basement_decor.png';
+import conservatoryDecor from '../../assets/conservatory_decor.png';
+import observatoryDecor from '../../assets/observatory_decor.png';
 
 import furnBookshelf from '../../assets/furniture_bookshelf.png';
 import furnDesk from '../../assets/furniture_desk.png';
 import furnStove from '../../assets/furniture_stove.png';
 import furnCounter from '../../assets/furniture_counter.png';
 import furnDiningTable from '../../assets/furniture_dining_table.png';
+
+// Texture lookup for tiled floors
+const floorTextures = {
+  'wood_floor.png': woodFloor,
+  'stone_floor.png': stoneFloor
+};
+
+// Decoration image lookup
+const decorationImages = {
+  'hallway_decor.png': hallwayDecor,
+  'garage_decor.png': garageDecor,
+  'basement_decor.png': basementDecor,
+  'conservatory_decor.png': conservatoryDecor,
+  'observatory_decor.png': observatoryDecor,
+  'bedroom_bg.png': bedroomBg,
+  'bathroom_bg.png': bathroomBg,
+  'dining_bg.png': diningBg,
+  'library_bg.png': libraryBg,
+  'study_bg.png': studyBg,
+  'kitchen_bg.png': kitchenBg,
+};
 
 const furnitureImages = {
   'furniture_bookshelf.png': furnBookshelf,
@@ -35,8 +71,10 @@ export default function RoomExploration2D() {
   const [otherPlayers, setOtherPlayers] = useState({});
   const [inspectedClue, setInspectedClue] = useState(null);
   const [discoveredClues, setDiscoveredClues] = useState([]);
+  const [showSuspects, setShowSuspects] = useState(false);
   
   const mapRef = useRef(null);
+  const wasMovingRef = useRef(false);
 
   const walls = useMemo(() => generateWalls(), []);
   
@@ -103,6 +141,20 @@ export default function RoomExploration2D() {
     colliders,
     handleMove
   );
+
+  // Footstep sounds — start/stop based on movement state
+  useEffect(() => {
+    if (localIsMoving && !wasMovingRef.current) {
+      startFootsteps();
+    } else if (!localIsMoving && wasMovingRef.current) {
+      stopFootsteps();
+    }
+    wasMovingRef.current = localIsMoving;
+
+    return () => {
+      stopFootsteps();
+    };
+  }, [localIsMoving]);
 
   // Listen for other players moving and sync initial positions
   useEffect(() => {
@@ -171,6 +223,7 @@ export default function RoomExploration2D() {
   useEffect(() => {
     const handleKeyPress = (e) => {
       if (e.key.toLowerCase() === 'e' && nearbyClue && !inspectedClue) {
+        playEvidenceSound();
         setInspectedClue(nearbyClue);
         if (!discoveredClues.find(c => c.name === nearbyClue.name)) {
           setDiscoveredClues(prev => [...prev, nearbyClue]);
@@ -203,24 +256,51 @@ export default function RoomExploration2D() {
       {/* 2D Canvas Container (Camera) */}
       <div className="absolute top-0 left-0" style={{ width: MAP_WIDTH, height: MAP_HEIGHT, ...cameraStyle, backgroundColor: '#0a0a0a' }}>
         
-        {/* Rooms Layer (Floors) */}
-        {mappedRooms.map(room => (
-          <div
-            key={room.id}
-            className="absolute flex items-center justify-center pointer-events-none"
-            style={{
-              left: room.x,
-              top: room.y,
-              width: room.width,
-              height: room.height,
-              backgroundImage: `url(${room.texture === 'wood_floor.png' ? woodFloor : stoneFloor})`,
-              backgroundSize: '200px',
-              boxShadow: 'inset 0 0 100px rgba(0,0,0,0.9)'
-            }}
-          >
-            {/* Room names have been moved to the bottom UI overlay */}
-          </div>
-        ))}
+        {/* Rooms Layer (Tiled Floors) */}
+        {mappedRooms.map(room => {
+          const textureSrc = floorTextures[room.texture] || stoneFloor;
+          return (
+            <div
+              key={room.id}
+              className="absolute pointer-events-none"
+              style={{
+                left: room.x,
+                top: room.y,
+                width: room.width,
+                height: room.height,
+                backgroundImage: `url(${textureSrc})`,
+                backgroundSize: '200px 200px',
+                backgroundRepeat: 'repeat',
+                backgroundPosition: 'center',
+                boxShadow: 'inset 0 0 80px rgba(0,0,0,0.7)'
+              }}
+            />
+          );
+        })}
+
+        {/* Decoration Layer (non-collidable room identity images) */}
+        {(LAYOUT.decorations || []).map(decor => {
+          const imgSrc = decorationImages[decor.image];
+          if (!imgSrc) return null;
+          return (
+            <div
+              key={decor.id}
+              className="absolute pointer-events-none"
+              style={{
+                left: decor.x,
+                top: decor.y,
+                width: decor.width,
+                height: decor.height,
+                backgroundImage: `url(${imgSrc})`,
+                backgroundSize: 'contain',
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: 'center',
+                opacity: 0.7,
+                zIndex: 2
+              }}
+            />
+          );
+        })}
 
         {/* Walls Layer */}
         {walls.map((wall, i) => (
@@ -258,9 +338,7 @@ export default function RoomExploration2D() {
               justifyContent: 'center',
               borderRadius: '4px'
             }}
-          >
-            {/* If the AI image has a black background, it usually blends ok with box-shadow, but we could also use mixBlendMode: 'screen' if they were light. Since they are dark, we leave it normal. */}
-          </div>
+          />
         ))}
 
         {/* Clues Layer */}
@@ -271,19 +349,38 @@ export default function RoomExploration2D() {
           return (
             <div
               key={clue.id}
-              className="absolute rounded-full shadow-[0_0_15px_rgba(218,165,32,0.4)] flex items-center justify-center transition-transform"
+              className={`absolute flex items-center justify-center transition-all duration-300 ${isNearby ? 'z-30' : 'z-10'}`}
               style={{
                 left: clue.x,
                 top: clue.y,
                 width: CLUE_SIZE,
                 height: CLUE_SIZE,
-                background: isNearby ? 'radial-gradient(circle, #ffeb99, #daa520)' : 'radial-gradient(circle, #daa520, #8b6914)',
-                transform: isNearby ? 'scale(1.2)' : 'scale(1)'
+                transform: isNearby ? 'scale(1.3)' : 'scale(1)',
               }}
             >
-              <span className="text-xs">🔍</span>
+              {/* Glowing aura when nearby */}
+              {isNearby && (
+                <div className="absolute inset-0 bg-[#daa520] opacity-30 rounded-full blur-md animate-pulse"></div>
+              )}
+              {/* Document Icon styling */}
+              <div 
+                className="relative bg-[#f4e4bc] border border-[#8b6914] shadow-[2px_2px_5px_rgba(0,0,0,0.8)] flex items-center justify-center"
+                style={{
+                  width: '70%', 
+                  height: '90%', 
+                  borderRadius: '2px',
+                  backgroundImage: 'repeating-linear-gradient(transparent, transparent 4px, rgba(139,105,20,0.2) 4px, rgba(139,105,20,0.2) 5px)',
+                  transform: 'rotate(-5deg)'
+                }}
+              >
+                {clue.isSupernatural && (
+                   <div className="absolute inset-0 bg-purple-500 opacity-20 animate-pulse mix-blend-overlay"></div>
+                )}
+                <span className="text-[10px] opacity-70">📝</span>
+              </div>
+              
               {isDiscovered && (
-                <div className="absolute -top-6 whitespace-nowrap text-[10px] text-[rgba(218,165,32,0.8)]">
+                <div className="absolute -top-6 whitespace-nowrap text-[10px] text-[rgba(218,165,32,0.9)] bg-black/70 px-1 rounded">
                   {clue.name}
                 </div>
               )}
@@ -295,15 +392,17 @@ export default function RoomExploration2D() {
         {Object.entries(otherPlayers).map(([id, p]) => (
           <div
             key={id}
-            className="absolute transition-all duration-100 ease-linear rounded-full flex flex-col items-center justify-center"
+            className="absolute transition-all duration-100 ease-linear flex flex-col items-center justify-center"
             style={{
               left: p.x,
               top: p.y,
               width: PLAYER_SIZE,
               height: PLAYER_SIZE,
-              background: 'radial-gradient(circle, rgba(100,0,0,0.8), rgba(50,0,0,0.9))',
-              border: '2px solid rgba(255,100,100,0.5)',
-              boxShadow: '0 0 20px rgba(255,0,0,0.3)',
+              backgroundImage: `url(${playerSprite})`,
+              backgroundSize: 'contain',
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'center',
+              filter: 'drop-shadow(0 0 10px rgba(255,0,0,0.6))',
               zIndex: 10
             }}
           >
@@ -315,15 +414,17 @@ export default function RoomExploration2D() {
 
         {/* Local Player Layer */}
         <div
-          className="absolute rounded-full flex flex-col items-center justify-center"
+          className="absolute flex flex-col items-center justify-center"
           style={{
             left: localPos.x,
             top: localPos.y,
             width: PLAYER_SIZE,
             height: PLAYER_SIZE,
-            background: 'radial-gradient(circle, #0044aa, #001144)',
-            border: '2px solid #5599ff',
-            boxShadow: '0 0 20px rgba(0,100,255,0.4)',
+            backgroundImage: `url(${playerSprite})`,
+            backgroundSize: 'contain',
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'center',
+            filter: 'drop-shadow(0 0 10px rgba(0,100,255,0.6))',
             zIndex: 20
           }}
         >
@@ -334,25 +435,49 @@ export default function RoomExploration2D() {
       </div>
 
       {/* UI Overlay */}
-      <div className="absolute top-0 left-0 right-0 p-4 pointer-events-none flex justify-between items-start">
-        <div className="bg-black/80 p-4 border border-[rgba(139,0,0,0.4)] pointer-events-auto">
-          <h3 className="text-[rgba(218,165,32,0.8)] tracking-widest text-sm mb-2 uppercase">Evidence Collected</h3>
+      <div className="absolute top-0 left-0 right-0 p-4 pointer-events-none flex justify-between items-start z-50">
+        
+        {/* Evidence Panel - Improved Visibility */}
+        <div 
+          className="bg-[#f4e4bc] p-5 border-4 border-[#8b6914] shadow-[5px_5px_15px_rgba(0,0,0,0.8)] pointer-events-auto min-w-[250px] rounded-sm relative"
+          style={{ backgroundImage: 'repeating-linear-gradient(transparent, transparent 4px, rgba(139,105,20,0.1) 4px, rgba(139,105,20,0.1) 5px)' }}
+        >
+          {/* Decorative pin */}
+          <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-4 h-4 bg-red-800 rounded-full border border-black shadow-md"></div>
+          
+          <h3 className="text-red-900 font-bold tracking-widest text-base mb-3 uppercase text-center border-b-2 border-red-900/30 pb-2">Evidence Collected</h3>
           {discoveredClues.length === 0 ? (
-            <p className="text-xs text-gray-500 italic">No evidence collected yet.</p>
+            <p className="text-sm text-gray-700 italic text-center py-2">No evidence collected yet.</p>
           ) : (
-            <ul className="text-xs text-gray-300 space-y-2">
+            <ul className="text-sm text-gray-900 font-medium space-y-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
               {discoveredClues.map((c, i) => (
-                <li key={i} className="flex gap-2">
-                  <span>•</span>
-                  <span>{c.name}</span>
+                <li 
+                  key={i} 
+                  className="flex items-center gap-3 cursor-pointer hover:bg-black/10 p-2 rounded transition-colors border border-transparent hover:border-[#8b6914]/30"
+                  onClick={() => setInspectedClue(c)}
+                  title="Click to read again"
+                >
+                  <span className="text-[#8b6914] text-lg drop-shadow-sm">📄</span>
+                  <span className="truncate">{c.name}</span>
                 </li>
               ))}
             </ul>
           )}
         </div>
         
-        <div className="bg-black/60 px-4 py-2 text-xs text-gray-400 rounded pointer-events-auto">
-          WASD to move
+        <div className="flex flex-col items-end gap-3 pointer-events-auto">
+          <div className="bg-black/80 px-4 py-2 text-sm text-white font-bold rounded-lg border border-gray-600 shadow-lg">
+            WASD to move
+          </div>
+          
+          {/* View Profiles Button - Improved Visibility */}
+          <button 
+            onClick={() => setShowSuspects(true)}
+            className="bg-gradient-to-b from-[#daa520] to-[#b8860b] border-2 border-white text-black hover:from-[#ffeb99] hover:to-[#daa520] transition-all px-6 py-3 text-sm rounded-lg shadow-[0_0_20px_rgba(218,165,32,0.6)] uppercase tracking-widest font-black flex items-center gap-2 transform hover:scale-105 animate-pulse"
+            style={{ animationDuration: '2s' }}
+          >
+            <span className="text-xl">👁️</span> View Suspect Profiles
+          </button>
         </div>
       </div>
 
@@ -400,6 +525,54 @@ export default function RoomExploration2D() {
               >
                 Close (Press ESC)
               </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Suspect Profiles Modal */}
+      <AnimatePresence>
+        {showSuspects && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 bg-black/90 z-50 flex items-center justify-center p-8 pointer-events-auto"
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 10 }}
+              animate={{ scale: 1, y: 0 }}
+              className="w-full max-w-4xl h-full max-h-[80vh] bg-[rgba(15,10,8,0.95)] border border-[rgba(139,0,0,0.5)] p-8 shadow-[0_0_50px_rgba(139,0,0,0.2)] flex flex-col"
+              style={{ backgroundImage: `url(${wallTexture})`, backgroundBlendMode: 'overlay', backgroundSize: '200px' }}
+            >
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-3xl text-[#d4c5a9] font-serif uppercase tracking-widest">Suspect Profiles</h2>
+                <button
+                  onClick={() => setShowSuspects(false)}
+                  className="px-4 py-2 bg-[rgba(139,0,0,0.2)] border border-[rgba(139,0,0,0.4)] text-[rgba(200,160,120,0.8)] hover:bg-[rgba(139,0,0,0.4)] hover:text-white transition-all uppercase tracking-widest text-sm"
+                >
+                  Close
+                </button>
+              </div>
+              
+              <div className="overflow-y-auto custom-scrollbar flex-1 pr-4 space-y-6">
+                {(mystery?.suspects || []).map((suspect, idx) => (
+                  <div key={idx} className="bg-black/40 border border-[#8b6914]/30 p-4 rounded flex flex-col gap-2">
+                    <div className="flex items-end justify-between border-b border-[#8b6914]/20 pb-2">
+                      <h3 className="text-xl text-[#daa520] font-bold">{suspect.name} {suspect.playerId === state.playerId ? '(You)' : ''}</h3>
+                      <span className="text-sm text-gray-400">{suspect.age} yrs • {suspect.occupation}</span>
+                    </div>
+                    <div className="text-sm text-gray-300">
+                      <span className="text-[rgba(218,165,32,0.6)] uppercase tracking-wider text-xs mr-2">Appearance:</span>
+                      {suspect.physicalDescription}
+                    </div>
+                    <div className="text-sm text-gray-300">
+                      <span className="text-[rgba(218,165,32,0.6)] uppercase tracking-wider text-xs mr-2">Public Info:</span>
+                      {suspect.publicBackground}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </motion.div>
           </motion.div>
         )}

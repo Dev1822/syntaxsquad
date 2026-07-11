@@ -6,6 +6,7 @@ import cors from 'cors';
 import connectDB from './config/db.js';
 import setupSocketHandlers from './socket/socketHandler.js';
 import Room from './models/Room.js';
+import voiceRoutes from './routes/voice.routes.js';
 
 const app = express();
 const httpServer = createServer(app);
@@ -39,6 +40,9 @@ app.use(express.json());
 app.get('/api/health', (req, res) => {
   res.json({ status: 'alive', message: 'The mansion awaits...', timestamp: Date.now() });
 });
+
+// Voice routes
+app.use('/api/voice', voiceRoutes);
 
 // Get room info (for QR/share validation)
 app.get('/api/rooms/:code', async (req, res) => {
